@@ -59,7 +59,7 @@ import wasmModule from './protocol.wasm';
 const instance = new WebAssembly.Instance(wasmModule);
 const {
     memory, getUuidPtr, getResultPtr, getDataPtr, getHttpAuthPtr, getSocks5AuthPtr, setHttpAuthLenWasm, setSocks5AuthLenWasm, parseProtocolWasm, parseUrlWasm,
-    initCredentialsWasm, getPanelHtmlPtr, getPanelHtmlLen, getErrorHtmlPtr, getErrorHtmlLen, getCorrectAddrTypeWasm, getTemplateWasm, getSecretStringWasm
+    initCredentialsWasm, getPanelHtmlPtr, getPanelHtmlLen, getErrorHtmlPtr, getErrorHtmlLen, getCorrectAddrTypeWasm, getTemplateWasm, getSecretStringWasm, initWasm
 } = instance.exports;
 const wasmMem = new Uint8Array(memory.buffer);
 const wasmRes = new Int32Array(memory.buffer, getResultPtr(), 32);
@@ -85,6 +85,7 @@ const getEnv = (env) => {
     return config;
 };
 const initializeWasm = (env) => {
+    initWasm((1024 >> 4) + 26);
     const {uuid, password, user, pass} = getEnv(env);
     const cleanUuid = uuid.replace(/-/g, "");
     if (cleanUuid.length === 32) {
@@ -683,9 +684,9 @@ const handleGrpcPost = async (request) => {
             };
             const close = () => {reader.releaseLock(), state.tcpSocket?.close(), controller.close()};
             (async () => {
-                let grpcBuffer = new ArrayBuffer(131072), used = 0, offset = 0;
+                let grpcBuffer = new ArrayBuffer(72728), used = 0, offset = 0;
                 while (true) {
-                    const {done, value} = await reader.read(new Uint8Array(grpcBuffer, used, 65536));
+                    const {done, value} = await reader.read(new Uint8Array(grpcBuffer, used, 8192));
                     if (done) break;
                     grpcBuffer = value.buffer;
                     const bufToProcess = new Uint8Array(grpcBuffer, 0, used + value.byteLength), bufLen = bufToProcess.byteLength;
@@ -720,10 +721,10 @@ const handleXhttpPost = async (request) => {
             const writable = {send: (chunk) => controller.enqueue(chunk)};
             const close = () => {reader.releaseLock(), state.tcpSocket?.close(), controller.close()};
             (async () => {
-                let xhttpBuffer = new ArrayBuffer(65536), used = 0, offset = 0;
+                let xhttpBuffer = new ArrayBuffer(8192), used = 0, offset = 0;
                 while (true) {
                     offset = used;
-                    const {done, value} = await reader.read(new Uint8Array(xhttpBuffer, offset, offset === 0 ? 65536 : 32768));
+                    const {done, value} = await reader.read(new Uint8Array(xhttpBuffer, offset, offset === 0 ? 8192 : 4096));
                     if (done) break;
                     xhttpBuffer = value.buffer;
                     used += value.byteLength;

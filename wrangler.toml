@@ -1,22 +1,21 @@
 name = "edcloudwasm"
 main = "_worker.js"  # 你的 JS 逻辑代码
-compatibility_date = "2023-08-15"
-compatibility_flags = [ "nodejs_compat" ]   # 推荐开启，更好支持 stream 等
+compatibility_date = "2026-04-04"
 
 # pages中环境变量需要手动填写并重试部署才会生效，worker环境变量和路由自定义域名这些建议直接使用wrangler.toml文件来配置
 # --- worker环境变量配置 ---
 [vars]
 # VLESS 的 UUID
-UUID = "183e65b1-169a-4131-a1ce-d60d7ffe3c93"
+UUID = "d342d11e-d424-4583-b36e-524ab1f0afa4"
 # Trojan 的密码
-PASSWORD = "xxulovemi"
+PASSWORD = "666"
 # S5和HTTP 入站验证用户名 
-# S5HTTPUSER = "admin"
+S5HTTPUSER = "admin"
 # S5和HTTP入站验证密码
-# S5HTTPPASS = "123456"
+S5HTTPPASS = "123456"
 # 付费worker 可设置cpu时间限制
-# [limits]
-# cpu_ms = 300000
+[limits]
+cpu_ms = 300000
 
 [observability]
 enabled = false
